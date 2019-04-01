@@ -19,56 +19,83 @@ class Pen(turtle.Turtle):
         self.direction = ['up', 'down', 'left', 'right']
 
 
-class Weapon(turtle.Turtle):
-    def __init__(self, x, y):
+class Node(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("Brown")
+        self.penup()
+        self.speed(0)
+        self.direction = ['up', 'down', 'lef', 'right']
+
+
+class Player(turtle.Turtle):
+    def __init__(self):
         turtle.Turtle.__init__(self)
         self.shape("circle")
-        self.color("yellow")
+        self.color("red")
         self.penup()
-        self.goto(x, y)
-        self.velocity = 10
+        self.speed(0)
+        self.gold = 0
+        self.direction = 'Left'
+        self.playerspeed= 1
 
-    def destroy(self):
-        self.goto(2000, 2000)
-        self.hideturtle()
+    def go_up(self):
+        x = self.xcor()
+        y = self.ycor() + 24
 
-    def move(self, other):
-        if other.direction == 'up':
-            self.direction = 'up'
-            dx = 0
-            dy = 24
-        elif other.direction == 'down':
-            self.direction = 'down'
-            dx = 0
-            dy = -24
-        elif other.direction == 'left':
-            self.direction = 'left'
-            dx = 24
-            dy = 0
-        elif other.direction == 'right':
-            self.direction = 'right'
-            dx = -24
-            dy = 0
-        else:
-            dx = 0
-            dy = 0
-
-        x = self.xcor() + dx*self.velocity
-        y = self.ycor() + dy*self.velocity
-
-        if (x, y) in enemies:
+        if (x, y) not in walls:
             self.goto(x, y)
-            Enemy.destroy()
-        else:
-            self.direction = random.choice(["up",
-                                            "down",
-                                            "left",
-                                            "right"])
+        # print("Player: ", x, y)
+        self.direction = 'up'
 
-    def colission(self, other):
+    def go_down(self):
+        x = self.xcor()
+        y = self.ycor() - 24
+
+        if (x, y) not in walls:
+            self.goto(x, y)
+        # print("Player: ", x, y)
+        self.direction = 'down'
+
+    def go_right(self):
+        x = self.xcor() + 24
+        y = self.ycor()
+
+        if (x, y) not in walls:
+            self.goto(x, y)
+        # print("Player: ", x, y)
+        self.direction = 'right'
+
+    def go_left(self):
+        x = self.xcor() - 24
+        y = self.ycor()
+
+        if (x, y) not in walls:
+            self.goto(x, y)
+        # print("Player: ", x, y)
+        self.direction = 'left'
+
+    def move_continues(self):
+        if self.direction == 'left':
+            self.go_left()
+
+        elif self.direction == 'right':
+            self.go_right()
+
+        elif self.direction == 'up':
+            self.go_up()
+
+        elif self.direction == 'down':
+            self.go_down()
+
+        else:
+            self.go_left()
+
+    def collission(self, other):
         a = self.xcor() - other.xcor()
         b = self.ycor() - other.ycor()
-        distance = math.sqrt((a ** 2) + (b ** 2))
+        distance = math.sqrt((a**2)+(b**2))
 
         if distance < 5:
             return True
@@ -84,66 +111,17 @@ class Treasure(turtle.Turtle):
         self.penup()
         self.gold = 100
         self.goto(x, y)
+        self.shapesize(0.25,0.25)
 
     def destroy(self):
         self.goto(2000, 2000)
         self.hideturtle()
-
-
-class Player(turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
-        self.shape("circle")
-        self.color("red")
-        self.penup()
-        self.speed(0)
-        self.gold = 0
-
-    def go_up(self):
-        x = self.xcor()
-        y = self.ycor() + 24
-        if (x, y) not in walls:
-            self.goto(x, y)
-        print("Player: ", x, y)
-
-    def go_down(self):
-        x = self.xcor()
-        y = self.ycor() - 24
-        if (x, y) not in walls:
-            self.goto(x, y)
-        print("Player: ", x, y)
-
-    def go_right(self):
-        x = self.xcor() + 24
-        y = self.ycor()
-        if (x, y) not in walls:
-            self.goto(x, y)
-        print("Player: ", x, y)
-
-    def go_left(self):
-        x = self.xcor() - 24
-        y = self.ycor()
-        if (x, y) not in walls:
-            self.goto(x, y)
-        print("Player: ", x, y)
-
-    def collission(self, other):
-        a = self.xcor() - other.xcor()
-        b = self.ycor() - other.ycor()
-        distance = math.sqrt((a**2)+(b**2))
-
-        if distance < 5:
-            return True
-        else:
-            return False
-
-
 class Enemy(turtle.Turtle):
     def __init__(self, x, y):
         turtle.Turtle.__init__(self)
         self.shape("triangle")
         self.color("Pink")
-        self.pendown()
+        self.penup()
         self.speed(10)
         self.gold = 25
         self.goto(x, y)
@@ -189,7 +167,7 @@ class Enemy(turtle.Turtle):
                                             "down",
                                             "left",
                                             "right"])
-        turtle.ontimer(self.move, t=10)
+        turtle.ontimer(self.move, t=70)
         print("Enemy: ", x, y)
 
     def is_close(self, other):
@@ -213,21 +191,21 @@ levels = [""]
 
 level1 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X                          X",
+    "XP                         X",
     "X XXXX XX XXXXXXXX XX XXXX X",
     "X XXXX XX XXXXXXXX XX XXXX X",
     "X   XX XX XXXXXXXX XX XX   X",
     "XXX XX XX          XX XX XXX",
     "XXX XX XXXXX XX XXXXX XX XXX",
-    "XXX    XXXXX XX XXXXX    XXX",
-    "XXX XX XX    XX    XX XX XXX",
+    "XXX    XXXXX XX XXXXXE   XXX",
+    "XXX XX XXT   XX    XX XX XXX",
     "XXX XX XX XXXXXXXX XX XX XXX",
     "XXX XX XX XXXXXXXX XX XX XXX",
-    "X   XX XX     E    XX XX   X",
+    "X   XX XX          XX XX   X",
     "X XXXX XX XXX  XXX XX XXXX X",
-    "X XXXX    X E    X    XXXX X",
-    "X   XX XX X E    X XX XX   X",
-    "XXX XX XX X E    X XX XX XXX",
+    "X XXXX    X      X    XXXX X",
+    "X   XX XX X      X XX XX   X",
+    "XXX XX XX X      X XX XX XXX",
     "XXX XX XX XXXXXXXX XX XX XXX",
     "X      XX          XX      X",
     "XXX XXXXX XXXXXXXX XXXXX XXX",
@@ -238,7 +216,7 @@ level1 = [
     "X XX      XX    XX      XX X",
     "X XX XXXX XX XX XX XXXX XX X",
     "X XX XXXX XX XX XX XXXX XX X",
-    "X      XX    XX    XXP     X",
+    "X      XX    XX    XX      X",
     "X XXXX XX XXXXXXXX XX XXXX X",
     "X XXXX XX XXXXXXXX XX XXXX X",
     "X      XX          XX      X",
@@ -258,16 +236,20 @@ def setup_maze(level):
                 pen.goto(screen_x, screen_y)
                 pen.stamp()
                 walls.append((screen_x, screen_y))
-            if cha == 'P':
-                player.goto(screen_x, screen_y)
-            if cha == 'T':
-                treasures.append(Treasure(screen_x, screen_y))
+
+            # if cha == 'T':
+            #     treasures.append(Treasure(screen_x, screen_y))
 
             if cha == 'E':
                 enemies.append(Enemy(screen_x, screen_y))
+                print("x: ",screen_x," y: ",screen_y)
 
-            if cha == 'W':
-                weapons.append(Weapon(screen_x, screen_y))
+            if cha == ' ' and cha != 'P' and cha !='E':
+                treasures.append(Treasure(screen_x,screen_y))
+
+            if cha == 'P':
+                player.goto(screen_x, screen_y)
+                print("x: ", screen_x, " y: ", screen_y)
 
 
 weapons = []
@@ -305,14 +287,10 @@ while True:
     for enemy in enemies:
         if player.collission(enemy):
             player.hideturtle()
+            # print(enemy," Had killed player")
             print("Player died!")
-        for weapon in weapons:
-            if weapon.colission(enemy):
-                print("enemy died!")
-                weapon.destroy()
-                enemy.destroy()
-                weapons.remove(weapon)
-                enemies.remove(enemy)
 
+
+    turtle.ontimer(player.move_continues(),t=175)
 
     wn.update()
